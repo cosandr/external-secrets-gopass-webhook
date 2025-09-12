@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -euo pipefail
+set -eo pipefail
 
 if [ -z "$REPO_URL" ] || [ -z "$GIT_AUTHOR_NAME" ] || [ -z "$GIT_AUTHOR_EMAIL" ]; then
     echo "REPO_URL,GIT_AUTHOR_NAME and GIT_AUTHOR_EMAIL are required"

@@ -1,0 +1,27 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: external-secrets-gopass-webhook
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: external-secrets-gopass-webhook
+      app.kubernetes.io/name: external-secrets-gopass-webhook
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: ingress-nginx
+      ports:
+      - protocol: TCP
+        port: http
+    - from:
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/instance: external-secrets
+      ports:
+      - protocol: TCP
+        port: http
