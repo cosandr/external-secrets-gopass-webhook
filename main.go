@@ -78,6 +78,14 @@ func main() {
 	})
 
 	http.HandleFunc("GET "+config.ApiGetSecretPath, func(w http.ResponseWriter, r *http.Request) {
+		if config.ApiAuthUser != "" {
+			username, password, ok := r.BasicAuth()
+			if !ok || (username != config.ApiAuthUser) || (password != config.ApiAuthPass) {
+				w.Header().Set("WWW-Authenticate", `Basic realm="restricted", charset="UTF-8"`)
+				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				return
+			}
+		}
 		api.HandleGetSecret(gopass, w, r)
 	})
 

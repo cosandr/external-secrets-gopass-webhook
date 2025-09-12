@@ -9,6 +9,8 @@ import (
 )
 
 type Config struct {
+	ApiAuthPass      string        `env:"API_AUTH_PASS"`
+	ApiAuthUser      string        `env:"API_AUTH_USER"`
 	ApiGetSecretPath string        `env:"ESO_WEBHOOK_PATH" envDefault:"/api/get"`
 	GitWebhookPath   string        `env:"GIT_WEBHOOK_PATH" envDefault:"/git"`
 	GitWebhookSecret string        `env:"GIT_WEBHOOK_SECRET,notEmpty"`
@@ -24,7 +26,12 @@ func Init() Config {
 		log.Fatalf("error reading configuration from environment: %v", err)
 	}
 	if cfg.RefreshInterval > 0 && cfg.RefreshInterval < cfg.RefreshLimit {
-		log.Errorln("Auto-refresh interval cannot be shorter than the refresh limit")
+		log.Errorln("auto-refresh interval cannot be shorter than the refresh limit")
+		os.Exit(1)
+	}
+
+	if (cfg.ApiAuthUser == "") != (cfg.ApiAuthPass == "") {
+		log.Errorln("auth requires both username and password")
 		os.Exit(1)
 	}
 	return cfg
