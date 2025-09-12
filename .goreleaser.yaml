@@ -27,7 +27,6 @@ dockers:
     use: buildx
     extra_files:
       - entrypoint.sh
-      - gopass.sources
 
 archives:
   - formats: [tar.gz]

@@ -36,7 +36,7 @@ REPO_URL=""
 ```
 
 ```sh
-go build
+CGO_ENABLED=0 go build
 docker build -t test .
 docker run --rm -v $PWD/external-secrets-gopass-webhook.gpg:/gopass.gpg --env-file .env -p 3000:3000 test
 ```
