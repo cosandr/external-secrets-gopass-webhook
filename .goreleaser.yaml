@@ -1,0 +1,53 @@
+# This is an example .goreleaser.yml file with some sensible defaults.
+# Make sure to check the documentation at https://goreleaser.com
+
+version: 2
+project_name: external-secrets-gopass-webhook
+
+before:
+  hooks:
+    - go mod tidy
+    - go mod download
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    binary: "{{.ProjectName}}"
+    goos:
+      - "linux"
+    goarch:
+      - "amd64"
+    ldflags:
+      - -s -w -X main.version={{.Version}} -X main.commit={{.ShortCommit}}
+
+dockers:
+  - image_templates:
+      - "ghcr.io/cosandr/{{.ProjectName}}:{{ .Tag }}"
+      - "ghcr.io/cosandr/{{.ProjectName}}:latest"
+    use: buildx
+    extra_files:
+      - entrypoint.sh
+      - gopass.sources
+
+archives:
+  - formats: [tar.gz]
+    # this name template makes the OS and Arch compatible with the results of uname.
+    name_template: "{{ .ProjectName }}-{{ .Version }}.{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
+    wrap_in_directory: true
+
+checksum:
+  name_template: 'sha256sums.txt'
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+
+release:
+  prerelease: auto
+
+# The lines beneath this are called `modelines`. See `:help modeline`
+# Feel free to remove those if you don't want/use them.
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+# vim: set ts=2 sw=2 tw=0 fo=cnqoj

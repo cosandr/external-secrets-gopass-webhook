@@ -1,0 +1,31 @@
+package config
+
+import (
+	"os"
+	"time"
+
+	"github.com/caarlos0/env/v11"
+	log "github.com/sirupsen/logrus"
+)
+
+type Config struct {
+	ApiGetSecretPath string        `env:"ESO_WEBHOOK_PATH" envDefault:"/api/get"`
+	GitWebhookPath   string        `env:"GIT_WEBHOOK_PATH" envDefault:"/git"`
+	GitWebhookSecret string        `env:"GIT_WEBHOOK_SECRET,notEmpty"`
+	GitWebhookType   string        `env:"GIT_WEBHOOK_TYPE,notEmpty"`
+	ListenAddress    string        `env:"LISTEN_ADDRESS" envDefault:"0.0.0.0:3000"`
+	RefreshInterval  time.Duration `env:"REFERSH_INTERVAL" envDefault:"1h"`
+	RefreshLimit     time.Duration `env:"REFRESH_LIMIT" envDefault:"5m"`
+}
+
+func Init() Config {
+	cfg := Config{}
+	if err := env.Parse(&cfg); err != nil {
+		log.Fatalf("error reading configuration from environment: %v", err)
+	}
+	if cfg.RefreshInterval > 0 && cfg.RefreshInterval < cfg.RefreshLimit {
+		log.Errorln("Auto-refresh interval cannot be shorter than the refresh limit")
+		os.Exit(1)
+	}
+	return cfg
+}

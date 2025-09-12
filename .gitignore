@@ -1,0 +1,5 @@
+## Ignore Binary
+external-secrets-gopass-webhook
+dist/
+.env
+*.gpg
