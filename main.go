@@ -29,14 +29,18 @@ func main() {
 
 	config := config.Init()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	gopass, err := gopass.NewGopass(ctx, config.RefreshLimit)
+	gopass, err := gopass.NewGopass(config.RefreshLimit)
 	if err != nil {
 		log.Fatalf("failed to initialize gopass: %v", err)
 	}
-	defer gopass.Close(ctx)
+	defer func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+		defer cancel()
+		if err := gopass.Close(ctx); err != nil {
+			log.Errorf("failed to close gopass: %v", err)
+		}
+		log.Debugln("gopass closed")
+	}()
 
 	if config.RefreshInterval > 0 {
 		log.Infof("auto-refreshing repo every %v", config.RefreshInterval)
@@ -46,7 +50,13 @@ func main() {
 			for {
 				select {
 				case <-ticker.C:
-					gopass.Pull(ctx, false)
+					log.Debugln("starting auto-refresh")
+					ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+					defer cancel()
+					if err := gopass.Pull(ctx, false); err != nil {
+						log.Errorf("auto-refresh failed: %v", err)
+					}
+					log.Debugln("auto-refresh completed")
 				case <-quit:
 					ticker.Stop()
 					return

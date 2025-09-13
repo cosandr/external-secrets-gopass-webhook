@@ -19,7 +19,7 @@ func HandleGetSecret(gp *gopass.Gopass, w http.ResponseWriter, r *http.Request) 
 		json.NewEncoder(w).Encode(map[string]string{"error": "Missing 'name' query parameter"})
 		return
 	}
-
+	log.Debugf("received GET request for secret '%s'", secretName)
 	val, err := gp.GetSecret(r.Context(), secretName)
 	if err != nil {
 		var notFoundErr *gopass.ErrSecretNotFound
@@ -36,4 +36,5 @@ func HandleGetSecret(gp *gopass.Gopass, w http.ResponseWriter, r *http.Request) 
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{"name": secretName, "value": val})
+	log.Debugf("completed GET request for secret '%s'", secretName)
 }

@@ -44,5 +44,7 @@ func HandleGitlabWebhook(hook *gitlab.Webhook, gp *gopass.Gopass, r *http.Reques
 func triggerRefresh(gp *gopass.Gopass) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	gp.Pull(ctx, true)
+	if err := gp.Pull(ctx, true); err != nil {
+		log.Errorf("refresh failed: %v", err)
+	}
 }

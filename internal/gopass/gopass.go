@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"slices"
 	"strings"
+	"sync"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -28,9 +29,12 @@ func (e *ErrSecretNotFound) Error() string {
 type Gopass struct {
 	gp             *api.Gopass // https://pkg.go.dev/github.com/gopasspw/gopass@v1.15.16/pkg/gopass/api#example-package
 	refreshLimiter *rate.Limiter
+	mu             sync.Mutex
 }
 
-func NewGopass(ctx context.Context, refreshLimit time.Duration) (*Gopass, error) {
+func NewGopass(refreshLimit time.Duration) (*Gopass, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	gp, err := api.New(ctx)
 	if err != nil {
 		log.Fatalf("failed to initialize gopass: %v", err)
@@ -62,6 +66,9 @@ func (g *Gopass) Pull(ctx context.Context, force bool) error {
 		log.Debugln("refresh not allowed yet")
 		return nil
 	}
+	// Can only run one git operation at once
+	g.mu.Lock()
+	defer g.mu.Unlock()
 	log.Debugln("starting gopass git repo refresh")
 	// gp.Sync() is not implemented
 	// Use git directly to handle force pushes and also because gopass sync attempts to push
