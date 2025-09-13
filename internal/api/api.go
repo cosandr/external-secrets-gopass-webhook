@@ -69,5 +69,12 @@ func HandlePostSecret(gp *gopass.Gopass, pushEnabled bool, w http.ResponseWriter
 		json.NewEncoder(w).Encode(map[string]string{"error": "Body missing 'name' and/or 'value'"})
 		return
 	}
-	// TODO: Implement pushing
+	if err := gp.Push(r.Context(), input.Name, input.Value); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"name": input.Name, "error": "Pushing secret failed"})
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"name": input.Name, "status": "OK"})
+	log.Debugf("completed POST request for secret '%s'", input.Name)
 }

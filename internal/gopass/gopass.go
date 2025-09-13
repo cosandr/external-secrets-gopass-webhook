@@ -14,6 +14,7 @@ import (
 	"golang.org/x/time/rate"
 
 	"github.com/gopasspw/gopass/pkg/gopass/api"
+	"github.com/gopasspw/gopass/pkg/gopass/secrets"
 )
 
 // ErrSecretNotFound is a custom error type for when a secret cannot be found.
@@ -100,6 +101,19 @@ func (g *Gopass) Pull(ctx context.Context, force bool) error {
 		log.Debugln("git pull OK")
 	}
 	log.Infoln("gopass git repo refreshed")
+	return nil
+}
+
+func (g *Gopass) Push(ctx context.Context, name string, value string) error {
+	// Pull first to ensure we don't overwrite stuff
+	g.Pull(ctx, true)
+	log.Debugf("starting pushing '%s'", name)
+	sec := secrets.New()
+	sec.SetPassword(value)
+	if err := g.gp.Set(ctx, name, sec); err != nil {
+		return err
+	}
+	log.Infof("pushed secret '%s'", name)
 	return nil
 }
 
