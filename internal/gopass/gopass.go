@@ -72,18 +72,32 @@ func (g *Gopass) Pull(ctx context.Context, force bool) error {
 	log.Debugln("starting gopass git repo refresh")
 	// gp.Sync() is not implemented
 	// Use git directly to handle force pushes and also because gopass sync attempts to push
-	cmd := exec.CommandContext(ctx, "gopass", "git", "fetch", "--prune")
+	pullOK := true
+	cmd := exec.CommandContext(ctx, "gopass", "git", "pull", "--prune", "--rebase")
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("git fetch failed '%v': %s", err, stderr.String())
+		pullOK = false
+		log.Warnf("git pull failed '%v': %s", err, stderr.String())
 	}
-	log.Debugln("git fetch OK")
-	cmd = exec.CommandContext(ctx, "gopass", "git", "reset", "--hard", "origin/HEAD")
-	stderr.Reset()
-	cmd.Stderr = &stderr
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("git reset failed '%v': %s", err, stderr.String())
+	// Reset if pull failed
+	if !pullOK {
+		cmd := exec.CommandContext(ctx, "gopass", "git", "fetch", "--prune")
+		stderr.Reset()
+		cmd.Stderr = &stderr
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf("git fetch failed '%v': %s", err, stderr.String())
+		}
+		log.Debugln("git fetch OK")
+		cmd = exec.CommandContext(ctx, "gopass", "git", "reset", "--hard", "origin/HEAD")
+		stderr.Reset()
+		cmd.Stderr = &stderr
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf("git reset failed '%v': %s", err, stderr.String())
+		}
+		log.Debugln("git reset OK")
+	} else {
+		log.Debugln("git pull OK")
 	}
 	log.Infoln("gopass git repo refreshed")
 	return nil

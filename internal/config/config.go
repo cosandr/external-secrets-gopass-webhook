@@ -9,15 +9,17 @@ import (
 )
 
 type Config struct {
-	ApiAuthPass      string        `env:"API_AUTH_PASS"`
-	ApiAuthUser      string        `env:"API_AUTH_USER"`
-	ApiGetSecretPath string        `env:"ESO_WEBHOOK_PATH" envDefault:"/api/get"`
-	GitWebhookPath   string        `env:"GIT_WEBHOOK_PATH" envDefault:"/git"`
-	GitWebhookSecret string        `env:"GIT_WEBHOOK_SECRET,notEmpty"`
-	GitWebhookType   string        `env:"GIT_WEBHOOK_TYPE,notEmpty"`
-	ListenAddress    string        `env:"LISTEN_ADDRESS" envDefault:"0.0.0.0:3000"`
-	RefreshInterval  time.Duration `env:"REFERSH_INTERVAL" envDefault:"1h"`
-	RefreshLimit     time.Duration `env:"REFRESH_LIMIT" envDefault:"5m"`
+	ApiAuthPass       string        `env:"API_AUTH_PASS"`
+	ApiAuthUser       string        `env:"API_AUTH_USER"`
+	ApiGetSecretPath  string        `env:"API_GET_PATH" envDefault:"/api/get"`
+	ApiPostSecretPath string        `env:"API_POST_PATH" envDefault:"/api/post"`
+	GitPushEnabled    bool          `env:"GIT_PUSH_ENABLED" envDefault:"false"`
+	GitWebhookPath    string        `env:"GIT_WEBHOOK_PATH" envDefault:"/git"`
+	GitWebhookSecret  string        `env:"GIT_WEBHOOK_SECRET,notEmpty"`
+	GitWebhookType    string        `env:"GIT_WEBHOOK_TYPE,notEmpty"`
+	ListenAddress     string        `env:"LISTEN_ADDRESS" envDefault:"0.0.0.0:3000"`
+	RefreshInterval   time.Duration `env:"REFERSH_INTERVAL" envDefault:"1h"`
+	RefreshLimit      time.Duration `env:"REFRESH_LIMIT" envDefault:"5m"`
 }
 
 func Init() Config {
