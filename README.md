@@ -10,6 +10,13 @@ If using HTTPS, check git provider docs, typically the username/pass are include
 
 `REPO_URL="https://username:token@github.com/username/repo.git"`
 
+### Push support
+
+Appears broken upstream. Webhook provider is [hardcoded to RO](https://github.com/external-secrets/external-secrets/blob/a116df926276d985213f6049fec953576131a91b/pkg/provider/webhook/webhook.go#L64)
+
+- `result` field is actually required for webhook secret stores
+- `PushSecret` fails with `could not write remote ref foo to target secretstore gopass-push: failed to push webhook data: failed to push webhook data: Secret does not exist`
+
 ### Env vars
 
 Required:
